@@ -1,5 +1,5 @@
 from agents import Agent
-from gradio_shopping_agent.tools import search_products
+from streamlit_shopping_agent.tools import search_products
 
 
 # Define the shopping manager agent with instructions for structured output

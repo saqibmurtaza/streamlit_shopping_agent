@@ -1,8 +1,8 @@
 import streamlit as st
 from openai import AssistantEventHandler, OpenAI
-from openai_agent_sdk.agent import Agent
-from openai_agent_sdk.models import ChatMessage
-from agents.search_products import search_products
+from streamlit_shopping_agent.shopping_agents import shopping_manager
+from streamlit_shopping.models import ChatMessage
+from streamlit_shopping_agent.tools import search_products
 import json
 
 # --- Setup session state ---

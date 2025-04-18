@@ -40,10 +40,10 @@ if user_input:
     st.session_state.chat_history.append(ChatMessage(role="user", content=user_input))
     with st.spinner("Thinking..."):
         response = Runner.run(
-        agent=shopping_manager,
-        chat_history=st.session_state.chat_history,
-        config=config
-)
+            shopping_manager, 
+            st.session_state.chat_history, 
+            config)
+
 
         st.session_state.chat_history.append(ChatMessage(role="assistant", content=response))
 

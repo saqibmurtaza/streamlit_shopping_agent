@@ -6,6 +6,10 @@ if gc_json:
         f.write(gc_json)
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = f.name
 
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+BASE_URL = os.getenv("BASE_URL")
+API_KEY = os.getenv("API_KEY")
+MODEL_NAME = os.getenv("MODEL_NAME")
 # Add src to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "src")))
 

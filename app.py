@@ -1,7 +1,18 @@
+import os, json, tempfile, sys
+# Handle Google credentials if available
+gc_json = os.getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON")
+if gc_json:
+    with tempfile.NamedTemporaryFile(mode="w", delete=False) as f:
+        f.write(gc_json)
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = f.name
+
+# Add src to the Python path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "src")))
+
 import streamlit as st
 from openai import AssistantEventHandler, OpenAI
 from streamlit_shopping_agent.shopping_agents import shopping_manager
-from streamlit_shopping.models import ChatMessage
+from streamlit_shopping_agent.models import ChatMessage
 from streamlit_shopping_agent.tools import search_products
 import json
 

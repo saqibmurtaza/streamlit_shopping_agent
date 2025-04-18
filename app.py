@@ -19,7 +19,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "src")))
 import streamlit as st
 from streamlit_shopping_agent.models import ChatMessage
 from streamlit_shopping_agent.tools import search_products
-from config_agents import agent, config
+from streamlit_shopping_agent.config import Config
 from agents import Runner
 
 # --- Setup session state ---

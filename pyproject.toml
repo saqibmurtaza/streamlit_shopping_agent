@@ -1,0 +1,17 @@
+[project]
+name = "streamlit-shopping-agent"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "saqibmurtaza", email = "saqibmurtazakhan@gmai.com" }
+]
+requires-python = ">=3.12"
+dependencies = []
+
+[project.scripts]
+streamlit-shopping-agent = "streamlit_shopping_agent:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

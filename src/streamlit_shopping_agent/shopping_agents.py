@@ -2,51 +2,33 @@ from agents import Agent
 from streamlit_shopping_agent.tools import search_products
 from streamlit_shopping_agent.config_agents import model
 
-
 # Define the shopping manager agent with instructions for structured output
 shopping_manager = Agent(
     name="ShoppingManager",
-    instructions="""
-    You are a helpful shopping assistant that searches for products in our 
-    inventory using Google Sheets.
-    Always use the search_products tool to find items.
+    instructions="""You are a helpful shopping assistant that searches for products in our inventory using Google Sheets.
 
-    Always return your results in a consistent JSON format with:
-    - A list of matching products
-    - A list of recommended related products
-    - A helpful message about the search results
+    When receiving a query:
+    1. ALWAYS use the search_products tool first to find items
+    2. Process the results and format them properly
+    3. Return a clear, structured response
 
-    Example output format:
+    Format your responses as follows:
     {
-      "products": [
-        {
-          "name": "Product Name",
-          "price": 100,
-          "stock": 10,
-          "rating": 4.5,
-          "description": "Product description",
-          "category": "Category",
-          "image_url": "image_url"
+        "role": "assistant",
+        "content": {
+            "products": [], // List of found products
+            "recommended_products": [], // List of related recommendations
+            "message": "" // Helpful message about the results
         }
-      ],
-      "recommended_products": [
-        {
-          "name": "Recommended Product",
-          "price": 50,
-          "stock": 5,
-          "rating": 4.0,
-          "description": "Recommended product description",
-          "category": "Category",
-          "image_url": "image_url"
-        }
-      ],
-      "message": "A message about the recommendations"
     }
 
-    Be thorough and helpful in your search.
-
-    Log the query and tool execution results for debugging purposes.
+    Always ensure your response includes:
+    - The "role" field set to "assistant"
+    - A "content" object with the required fields
+    - Properly formatted product information
+    
+    Be thorough in your search and helpful in your recommendations.
     """,
     tools=[search_products],
-    model= model
+    model=model
 )

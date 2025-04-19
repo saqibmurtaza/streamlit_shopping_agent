@@ -5,4 +5,7 @@ google-auth-oauthlib>=0.4.6
 gspread>=6.2.0
 requests
 jsonschema
-streamlit
+streamlit>=1.24.0
+google-cloud-aiplatform
+google-generativeai
+python-dotenv

@@ -1,22 +1,15 @@
 import os, json, tempfile, sys, asyncio
-from dotenv import load_dotenv
+import streamlit as st
 
-# Load environment variables
-load_dotenv()
-
-# Handle Google credentials if available
-gc_json = os.getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON")
-if gc_json:
-    with tempfile.NamedTemporaryFile(mode="w", delete=False) as f:
-        f.write(gc_json)
+# Setup Google credentials from Streamlit secrets
+if "GOOGLE_APPLICATION_CREDENTIALS_JSON" in st.secrets:
+    with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json') as f:
+        json.dump(json.loads(st.secrets["GOOGLE_APPLICATION_CREDENTIALS_JSON"]), f)
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = f.name
-
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
 
 # Add src to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "src")))
 
-import streamlit as st
 from streamlit_shopping_agent.models import ChatMessage
 from streamlit_shopping_agent.tools import search_products
 from streamlit_shopping_agent.config_agents import config
@@ -38,30 +31,66 @@ st.title("🪑 Furniture Shopping Assistant")
 user_input = st.chat_input("Ask about a product...")
 
 # Convert chat history to the expected format before passing to Runner.run
-formatted_chat_history = [
-    {"role": msg.role, "content": msg.content} for msg in st.session_state.chat_history
-]
-
-# Ensure the response from Runner.run is converted to a string before appending to chat_history
 if user_input:
+    # Add user message to chat history
     st.session_state.chat_history.append(ChatMessage(role="user", content=user_input))
+    
+    # Format chat history for the agent
+    formatted_chat_history = [
+        {"role": msg.role, "content": msg.content if isinstance(msg.content, str) else json.dumps(msg.content)}
+        for msg in st.session_state.chat_history
+    ]
+
     with st.spinner("Thinking..."):
-        response = asyncio.run(
-            Runner.run(
-                shopping_manager,
-                formatted_chat_history
+        try:
+            # Get response from agent
+            response = asyncio.run(
+                Runner.run(
+                    shopping_manager,
+                    formatted_chat_history
+                )
             )
-        )
+            
+            # Parse the response if it's a string containing JSON
+            if isinstance(response, str):
+                try:
+                    response_data = json.loads(response)
+                except json.JSONDecodeError:
+                    response_data = {"role": "assistant", "content": response}
+            else:
+                response_data = response
 
-        # Convert response to string if it's not already
-        response_content = str(response) if not isinstance(response, str) else response
+            # Add assistant message to chat history
+            st.session_state.chat_history.append(
+                ChatMessage(
+                    role="assistant",
+                    content=response_data.get("content", response)
+                )
+            )
+        except Exception as e:
+            st.error(f"Error: {str(e)}")
+            st.session_state.chat_history.append(
+                ChatMessage(role="assistant", content=f"I apologize, but I encountered an error: {str(e)}")
+            )
 
-        st.session_state.chat_history.append(ChatMessage(role="assistant", content=response_content))
-
-# --- Display chat messages ---#
+# --- Display chat messages ---
 for msg in st.session_state.chat_history:
     with st.chat_message(msg.role):
-        st.markdown(msg.content)
+        if isinstance(msg.content, dict):
+            # Display structured content
+            if "products" in msg.content:
+                st.write(msg.content["message"])
+                if msg.content["products"]:
+                    st.write("Found Products:")
+                    for product in msg.content["products"]:
+                        st.write(f"- {product['name']} (${product['price']})")
+                if msg.content["recommended_products"]:
+                    st.write("Recommended Products:")
+                    for product in msg.content["recommended_products"]:
+                        st.write(f"- {product['name']} (${product['price']})")
+        else:
+            # Display regular message content
+            st.markdown(str(msg.content))
 
 # --- Cart sidebar ---
 st.sidebar.title("🛒 Your Cart")
@@ -77,26 +106,7 @@ if st.session_state.cart:
 else:
     st.sidebar.markdown("Cart is empty.")
 
-# --- Add to cart detection ---
-if st.session_state.chat_history:
-    last_msg = st.session_state.chat_history[-1].content.lower()
-    if "add to cart" in last_msg:
-        added = False
-        for msg in reversed(st.session_state.chat_history):
-            if msg.role == "assistant":
-                lines = msg.content.split("\n")
-                for line in lines:
-                    if line.startswith("- "):
-                        product_name = line.strip("- ").strip()
-                        st.session_state.cart.append({"name": product_name, "price": "Unknown"})
-                        added = True
-                        break
-                    if added:
-                        break
-                    if not added:
-                        st.sidebar.warning("Couldn't identify the product to add to cart.")
-
-# --- Optional: Button to clear chat or cart ---
+# --- Clear buttons ---
 with st.sidebar:
     if st.button("🧹 Clear Chat"):
         st.session_state.chat_history = []

@@ -36,18 +36,21 @@ st.title("🪑 Furniture Shopping Assistant")
 
 # --- Chat input ---
 user_input = st.chat_input("Ask about a product...")
+
+# Convert chat history to the expected format before passing to Runner.run
+formatted_chat_history = [
+    {"role": msg.role, "content": msg.content} for msg in st.session_state.chat_history
+]
+
 if user_input:
     st.session_state.chat_history.append(ChatMessage(role="user", content=user_input))
     with st.spinner("Thinking..."):
-        # Option 3: If Runner.run() accepts config as a keyword argument
         response = asyncio.run(
             Runner.run(
-            shopping_manager,
-            st.session_state.chat_history
+                shopping_manager,
+                formatted_chat_history
+            )
         )
-        )
-
-
 
         st.session_state.chat_history.append(ChatMessage(role="assistant", content=response))
 

@@ -3,9 +3,23 @@ import streamlit as st
 
 # Setup Google credentials from Streamlit secrets
 if "GOOGLE_APPLICATION_CREDENTIALS_JSON" in st.secrets:
-    with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json') as f:
-        json.dump(json.loads(st.secrets["GOOGLE_APPLICATION_CREDENTIALS_JSON"]), f)
-        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = f.name
+    try:
+        # Clean and parse the JSON string
+        creds_str = st.secrets["GOOGLE_APPLICATION_CREDENTIALS_JSON"].strip()
+        # Remove any invalid control characters
+        creds_str = ''.join(char for char in creds_str if ord(char) >= 32 or char in '\n\r\t')
+        
+        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json') as f:
+            # Parse and re-dump to ensure valid JSON
+            creds_dict = json.loads(creds_str)
+            json.dump(creds_dict, f, indent=2)
+            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = f.name
+            
+    except json.JSONDecodeError as e:
+        st.error(f"Error parsing Google credentials: {str(e)}")
+        st.error("Please check your Google credentials in Streamlit secrets")
+    except Exception as e:
+        st.error(f"Error setting up Google credentials: {str(e)}")
 
 # Add src to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "src")))

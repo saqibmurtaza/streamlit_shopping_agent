@@ -1,4 +1,4 @@
-import os, json, tempfile, sys
+import os, json, tempfile, sys, asyncio
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -40,9 +40,11 @@ if user_input:
     st.session_state.chat_history.append(ChatMessage(role="user", content=user_input))
     with st.spinner("Thinking..."):
         # Option 3: If Runner.run() accepts config as a keyword argument
-        response = Runner.run(
+        response = asyncio.run(
+            Runner.run(
             shopping_manager,
             st.session_state.chat_history
+        )
         )
 
 

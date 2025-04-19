@@ -42,6 +42,7 @@ formatted_chat_history = [
     {"role": msg.role, "content": msg.content} for msg in st.session_state.chat_history
 ]
 
+# Ensure the response from Runner.run is converted to a string before appending to chat_history
 if user_input:
     st.session_state.chat_history.append(ChatMessage(role="user", content=user_input))
     with st.spinner("Thinking..."):
@@ -52,7 +53,10 @@ if user_input:
             )
         )
 
-        st.session_state.chat_history.append(ChatMessage(role="assistant", content=response))
+        # Convert response to string if it's not already
+        response_content = str(response) if not isinstance(response, str) else response
+
+        st.session_state.chat_history.append(ChatMessage(role="assistant", content=response_content))
 
 # --- Display chat messages ---#
 for msg in st.session_state.chat_history:

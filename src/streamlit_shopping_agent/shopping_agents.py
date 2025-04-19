@@ -9,13 +9,13 @@ shopping_manager = Agent(
     instructions="""
     You are a helpful shopping assistant that searches for products in our 
     inventory using Google Sheets.
-    Always use the search_products tool to find items
-    
+    Always use the search_products tool to find items.
+
     Always return your results in a consistent JSON format with:
     - A list of matching products
     - A list of recommended related products
     - A helpful message about the search results
-    
+
     Example output format:
     {
       "products": [
@@ -42,8 +42,10 @@ shopping_manager = Agent(
       ],
       "message": "A message about the recommendations"
     }
-    
+
     Be thorough and helpful in your search.
+
+    Log the query and tool execution results for debugging purposes.
     """,
     tools=[search_products],
     model= model

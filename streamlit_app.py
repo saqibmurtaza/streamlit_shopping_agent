@@ -4,20 +4,26 @@ import streamlit as st
 # Setup Google credentials from Streamlit secrets
 if "GOOGLE_APPLICATION_CREDENTIALS_JSON" in st.secrets:
     try:
-        # Clean and parse the JSON string
-        creds_str = st.secrets["GOOGLE_APPLICATION_CREDENTIALS_JSON"].strip()
-        # Remove any invalid control characters
-        creds_str = ''.join(char for char in creds_str if ord(char) >= 32 or char in '\n\r\t')
+        # Get the credentials JSON string and ensure it's properly formatted
+        creds_str = st.secrets["GOOGLE_APPLICATION_CREDENTIALS_JSON"]
         
+        # Clean the string: remove any BOM and normalize newlines
+        if isinstance(creds_str, str):
+            creds_str = creds_str.encode('utf-8').decode('utf-8-sig')  # Remove BOM if present
+            creds_str = creds_str.replace('\r\n', '\n').replace('\r', '\n')  # Normalize newlines
+        
+        # Create a temporary file for the credentials
         with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json') as f:
-            # Parse and re-dump to ensure valid JSON
-            creds_dict = json.loads(creds_str)
-            json.dump(creds_dict, f, indent=2)
+            if isinstance(creds_str, dict):
+                json.dump(creds_str, f, indent=2)
+            else:
+                # If it's a string, parse it first then dump it
+                creds_dict = json.loads(creds_str)
+                json.dump(creds_dict, f, indent=2)
             os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = f.name
-            
     except json.JSONDecodeError as e:
-        st.error(f"Error parsing Google credentials: {str(e)}")
-        st.error("Please check your Google credentials in Streamlit secrets")
+        st.error(f"Error parsing Google credentials JSON: {str(e)}")
+        st.error("Please ensure your Google credentials are properly formatted JSON")
     except Exception as e:
         st.error(f"Error setting up Google credentials: {str(e)}")
 

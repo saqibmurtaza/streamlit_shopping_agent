@@ -1,6 +1,6 @@
-from typing import Literal
+from typing import Literal, Union, Dict, Any
 from pydantic import BaseModel
 
 class ChatMessage(BaseModel):
     role: Literal["user", "assistant", "system"]
-    content: str
+    content: Union[str, Dict[str, Any]]

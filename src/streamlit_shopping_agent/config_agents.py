@@ -1,35 +1,42 @@
-from google.generativeai import configure
-from agents import Agent, Runner, OpenAIChatCompletionsModel, function_tool, set_tracing_disabled
+from openai import AsyncOpenAI
+from agents import OpenAIChatCompletionsModel, set_tracing_disabled
 from agents.run import RunConfig
-import google.generativeai as genai
 import streamlit as st
 import sys
 
 try:
     # Get configuration from Streamlit secrets
-    BASE_URL = st.secrets.get("BASE_URL")
     API_KEY = st.secrets.get("API_KEY")
-    MODEL_NAME = st.secrets.get("MODEL_NAME")
+    MODEL_NAME = st.secrets.get("MODEL_NAME", "gpt-3.5-turbo")
     GOOGLE_CREDS_JSON = st.secrets.get("GOOGLE_APPLICATION_CREDENTIALS_JSON")
 
-    if not all([API_KEY, MODEL_NAME, GOOGLE_CREDS_JSON]):
-        st.error("Error: Missing required secrets. Please check your Streamlit secrets configuration.")
+    if not API_KEY:
+        st.error("Error: Missing API key. Please check your Streamlit secrets configuration.")
         sys.exit(1)
 
-    # Configure Google AI
-    configure(api_key=API_KEY)
-    
+    # Initialize OpenAI client
+    client = AsyncOpenAI(
+        api_key=API_KEY,
+        base_url="https://api.openai.com/v1"  # Default OpenAI API URL
+    )
+
+    set_tracing_disabled(disabled=True)
+
     # Initialize the model
-    model = genai.GenerativeModel(MODEL_NAME)
+    model = OpenAIChatCompletionsModel(
+        model=MODEL_NAME,
+        openai_client=client,
+        temperature=0.7,
+        max_tokens=1000
+    )
 
     # Configure the model settings
     config = RunConfig(
         model=model,
-        temperature=0.7,
-        max_tokens=1000,
+        model_provider=client,
         tracing_disabled=True
     )
 
 except Exception as e:
-    st.error(f"Error initializing Google AI client: {str(e)}")
+    st.error(f"Error initializing OpenAI client: {str(e)}")
     sys.exit(1)

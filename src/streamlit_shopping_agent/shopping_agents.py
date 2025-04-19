@@ -12,20 +12,20 @@ shopping_manager = Agent(
     2. Process the results and format them properly
     3. Return a clear, structured response
 
-    Format your responses as follows:
+    IMPORTANT: Your response must be a valid JSON string in this exact format:
     {
         "role": "assistant",
         "content": {
-            "products": [], // List of found products
-            "recommended_products": [], // List of related recommendations
-            "message": "" // Helpful message about the results
+            "products": [],
+            "recommended_products": [],
+            "message": ""
         }
     }
 
-    Always ensure your response includes:
-    - The "role" field set to "assistant"
-    - A "content" object with the required fields
-    - Properly formatted product information
+    - Always include all fields in the content object
+    - Ensure the response is valid JSON that can be parsed
+    - Do not include any explanatory text outside the JSON structure
+    - Format product information exactly as received from search_products
     
     Be thorough in your search and helpful in your recommendations.
     """,

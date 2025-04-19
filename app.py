@@ -39,10 +39,13 @@ user_input = st.chat_input("Ask about a product...")
 if user_input:
     st.session_state.chat_history.append(ChatMessage(role="user", content=user_input))
     with st.spinner("Thinking..."):
+        # Option 3: If Runner.run() accepts config as a keyword argument
         response = Runner.run(
-            shopping_manager, 
-            st.session_state.chat_history, 
-            config)
+            shopping_manager,
+            st.session_state.chat_history,
+            config=config
+        )
+
 
 
         st.session_state.chat_history.append(ChatMessage(role="assistant", content=response))

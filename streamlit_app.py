@@ -42,8 +42,7 @@ if user_input:
         # Option 3: If Runner.run() accepts config as a keyword argument
         response = Runner.run(
             shopping_manager,
-            st.session_state.chat_history,
-            config=config
+            st.session_state.chat_history
         )
 
 

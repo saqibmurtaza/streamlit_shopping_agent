@@ -1,5 +1,6 @@
 from agents import Agent
 from streamlit_shopping_agent.tools import search_products
+from streamlit_shopping_agent.config_agents import model
 
 
 # Define the shopping manager agent with instructions for structured output
@@ -44,5 +45,6 @@ shopping_manager = Agent(
     
     Be thorough and helpful in your search.
     """,
-    tools=[search_products]
+    tools=[search_products],
+    model= model
 )

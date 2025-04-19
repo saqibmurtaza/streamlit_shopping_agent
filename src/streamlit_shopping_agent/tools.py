@@ -33,8 +33,13 @@ async def search_products(
         products = sheet.get_all_records()
         print(f"🗄️  [search_products] Fetched {len(products)} rows from sheet.")
 
+        # Normalize name and category fields for better matching
+        for p in products:
+            p["name"] = p.get("name", "").strip().lower()
+            p["category"] = p.get("category", "").strip().lower()
+
         # Build variations for matching
-        query_words      = [w.strip().lower() for w in query.split()]
+        query_words = [w.strip().lower() for w in query.split()]
         query_variations = []
         for w in query_words:
             query_variations.append(w)
@@ -46,8 +51,8 @@ async def search_products(
         # Find matches in name OR category
         matching = []
         for p in products:
-            name = p.get("name", "").lower()
-            cat  = p.get("category", "").lower()
+            name = p["name"]
+            cat = p["category"]
             if any(var in name for var in query_variations) or any(var in cat for var in query_variations):
                 matching.append(p)
         print(f"✅ [search_products] Matched {len(matching)} products: {[p['name'] for p in matching]}")

@@ -105,6 +105,4 @@ with st.sidebar:
         st.session_state.cart = []
         st.rerun()
 
-# if st.button("🗑️ Clear Cart"):
-#         st.session_state.cart = []
-#         st.rerun()
+

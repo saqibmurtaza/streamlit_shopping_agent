@@ -47,7 +47,7 @@ if user_input:
 
         st.session_state.chat_history.append(ChatMessage(role="assistant", content=response))
 
-# --- Display chat messages ---
+# --- Display chat messages ---#
 for msg in st.session_state.chat_history:
     with st.chat_message(msg.role):
         st.markdown(msg.content)

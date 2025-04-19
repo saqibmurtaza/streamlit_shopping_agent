@@ -22,12 +22,10 @@ try:
 
     set_tracing_disabled(disabled=True)
 
-    # Initialize the model
+    # Initialize the model without temperature parameter
     model = OpenAIChatCompletionsModel(
         model=MODEL_NAME,
-        openai_client=client,
-        temperature=0.7,
-        max_tokens=1000
+        openai_client=client
     )
 
     # Configure the model settings

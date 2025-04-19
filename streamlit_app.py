@@ -4,28 +4,36 @@ import streamlit as st
 # Setup Google credentials from Streamlit secrets
 if "GOOGLE_APPLICATION_CREDENTIALS_JSON" in st.secrets:
     try:
-        # Get the credentials JSON string and ensure it's properly formatted
+        # Get the credentials JSON string
         creds_str = st.secrets["GOOGLE_APPLICATION_CREDENTIALS_JSON"]
         
-        # Clean the string: remove any BOM and normalize newlines
-        if isinstance(creds_str, str):
-            creds_str = creds_str.encode('utf-8').decode('utf-8-sig')  # Remove BOM if present
-            creds_str = creds_str.replace('\r\n', '\n').replace('\r', '\n')  # Normalize newlines
-        
-        # Create a temporary file for the credentials
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json') as f:
-            if isinstance(creds_str, dict):
-                json.dump(creds_str, f, indent=2)
-            else:
-                # If it's a string, parse it first then dump it
+        # Handle both string and dictionary inputs
+        if isinstance(creds_str, dict):
+            creds_dict = creds_str
+        else:
+            # Clean the JSON string
+            # Remove any BOM and normalize line endings
+            creds_str = creds_str.encode('utf-8').decode('utf-8-sig')
+            # Replace any Windows line endings with Unix line endings
+            creds_str = creds_str.replace('\r\n', '\n')
+            # Remove any other control characters except newlines and spaces
+            creds_str = ''.join(char for char in creds_str if char == '\n' or ord(char) >= 32)
+            
+            try:
                 creds_dict = json.loads(creds_str)
-                json.dump(creds_dict, f, indent=2)
+            except json.JSONDecodeError as e:
+                st.error(f"Error parsing Google credentials JSON: {str(e)}")
+                st.error("Please ensure your Google credentials are properly formatted JSON")
+                sys.exit(1)
+        
+        # Write the cleaned credentials to a temporary file
+        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json') as f:
+            json.dump(creds_dict, f, indent=2)
             os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = f.name
-    except json.JSONDecodeError as e:
-        st.error(f"Error parsing Google credentials JSON: {str(e)}")
-        st.error("Please ensure your Google credentials are properly formatted JSON")
+            
     except Exception as e:
         st.error(f"Error setting up Google credentials: {str(e)}")
+        sys.exit(1)
 
 # Add src to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "src")))
